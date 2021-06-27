@@ -1,9 +1,9 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
-import { blogPosts } from '../lib/data'
+import { getAllPosts } from '../lib/data'
 
-export default function Home() {
+export default function Home({ posts }) {
   return (
     <div>
       <Head>
@@ -12,7 +12,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className='space-y-4'>
-        {blogPosts.map((item) => (
+        {posts.map((item) => (
           <BlogListItem key={item.slug} {...item} />
         ))}
       </div>
@@ -32,4 +32,20 @@ function BlogListItem({ slug, title, date, content }) {
       <div>{content}</div>
     </div>
   )
+}
+
+export async function getStaticProps() {
+  const allPosts = getAllPosts();
+  return {
+    props: {
+      posts: allPosts.map(({data, content, slug}) => ({
+        ...data,
+        date : data.date.toISOString(),
+        content,
+        slug,
+      }))
+
+    }
+    
+  };
 }
