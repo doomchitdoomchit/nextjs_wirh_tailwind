@@ -1,10 +1,11 @@
 import Head from 'next/head'
 import { format, parseISO } from 'date-fns'
-import { serialize } from 'next-mdx-remote/serialize'
-import { MDXRemote } from 'next-mdx-remote'
+import renderToString from 'next-mdx-remote/render-to-string'
+import hydrate from 'next-mdx-remote/hydrate'
 import { getAllPosts } from '../../lib/data';
 
 export default function BlogPage({ title, date, content }) {
+  const hydratedContent = hydrate(content)
   return (
     <div>
       <Head>
@@ -19,11 +20,8 @@ export default function BlogPage({ title, date, content }) {
             {format(parseISO(date), 'MMMM do, uuu')}
             </div>
         </div>
-        {/* <div className="wrapper">
-          <MDXRemote content/>
-        </div> */}
-        <div className='whitespace-pre'>
-            {content}
+        <div className='prose'>
+            {hydratedContent}
         </div>
 
       </main>
@@ -34,8 +32,7 @@ export async function getStaticProps(context) {
   const { params } = context;
   const allPosts = getAllPosts();
   const { data, content } = allPosts.find((item) => item.slug === params.slug);
-  const mdxSource = await serialize(content)
-  console.log(mdxSource);
+  const mdxSource = await renderToString(content)
   return {
     props: {
         ...data,
